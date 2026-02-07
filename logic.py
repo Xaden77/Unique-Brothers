@@ -3,6 +3,7 @@ from datetime import datetime,timedelta
 class Logic:
     def __init__(self,Store):
         self.Store=Store
+        self.online=[["Online Purchase","Amount"]]
         self.data2=[["Online Purchase","Amount","Cash Purchase","Amount"]]
     def store(self,date,cash,upi,source,amount,hand,credit,purchase):
         if not cash.isdigit() or not upi.isdigit() or not hand.isdigit() or not credit.isdigit():
@@ -10,7 +11,9 @@ class Logic:
         if not amount=="" and not source=="":
             if purchase=="Online Expense":
                 temp=[source,amount,"",""]
-                self.data2.append(temp) 
+                self.data2.append(temp)
+                temp = temp[:-2]
+                self.online.append(temp) 
             if purchase=="Cash Expense":
                 temp=["","",source,amount]
                 self.data2.append(temp)
@@ -19,6 +22,13 @@ class Logic:
                 return 1
         else:
             return 1
+        self.data2 = [data for data in self.data2 if data[2] != ""]
+        while len(self.data2)<len(self.online):
+            self.data2.append(["","","",""])
+        for a,b in zip(self.online,self.data2):
+            b[0]=a[0]
+            b[1]=a[1]
+        self.online=[["Online Purchase","Amount"]]
         folder=r"C:\ub"
         os.makedirs(folder, exist_ok=True)
         self.date=date.replace("/","_")
@@ -44,9 +54,9 @@ class Logic:
         onlineloss=0
         cashloss=0
         for i in range(1,len(self.data2)):
-            if self.data2[i][3]=='':
+            if self.data2[i][1]!='':
                 onlineloss=onlineloss+int(self.data2[i][1])
-            if self.data2[i][1]=='':
+            if self.data2[i][3]!='':
                 cashloss=cashloss+int(self.data2[i][3])
         loss=onlineloss+cashloss
         self.Store.expense(self.data2,onlineloss,cashloss,loss)
@@ -54,7 +64,7 @@ class Logic:
         dayTotal = profit-loss
         account = dayTotal-int(hand)
         self.Store.net_sales(str(account),hand,dayTotal)
-        
+        self.Store.info(self.date)                                            
         self.Store.save(self.date)
         if os.path.exists(f"c:\\ub\\{self.date}.docx"):
             return 1
@@ -65,10 +75,13 @@ class Logic:
             return 1
         if purchase=="Online Expense":
             temp=[source,amount,"",""]
-            self.data2.append(temp) 
+            self.data2.append(temp)
+            temp = temp[:-2]
+            self.online.append(temp)
         if purchase=="Cash Expense":
             temp=["","",source,amount]
             self.data2.append(temp)  
+        
     def rem(self):
         if len(self.data2)<=1:
             return 1
@@ -76,7 +89,8 @@ class Logic:
         
     def kill(self):
         self.data2=[["Online Purchase","Amount","Cash Purchase","Amount"]]
-
+        self.online=[["Online Purchase","Amount"]]
+        
     def switch(self):
        pass
 

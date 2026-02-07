@@ -1,5 +1,7 @@
 from docx import Document
-
+from docx.shared import Pt
+from docx.oxml.ns import qn
+import os
 class Store():
     def __init__(self):
         pass
@@ -7,7 +9,10 @@ class Store():
         self.doc=Document()
         self.data=[]
         self.data1=[]
-        self.doc.add_heading(f"Sales and Expenditure report on {date}",level=0)
+        style = self.doc.styles['Normal']
+        style.font.name = 'Times New Roman'
+        style._element.rPr.rFonts.set(qn('w:eastAsia'), 'Times New Roman')
+        self.doc.add_heading(f"Sales and Expenditure report on {date}",level=1)
 
     def opening_balance(self,date):
         try:
@@ -25,7 +30,6 @@ class Store():
             table0.cell(0,0).text = "Opening Balance"
             table0.cell(0,1).text = self.prevDayTotal
         except Exception as e:
-            print(e)
             table0=self.doc.add_table(rows=1,cols=2)
             table0.style="Table Grid"
             table0.cell(0,0).text = "Opening Balance"
@@ -74,5 +78,38 @@ class Store():
         table3.cell(2,1).text = account
         table3.cell(3,0).text = "Closing Balance"
         table3.cell(3,1).text = strGrandTotal
+        
+    def info(self,date):
+        if not os.path.exists(f"c:\\ub\\data.docx"):
+            folder = r"c:\ub"
+            total_sum = 0
+            for filename in os.listdir(folder):
+                if filename.endswith(".docx") and filename != "data.docx":   
+                    full_path = os.path.join(folder, filename)
+                    doc = Document(full_path)
+                    table1 = doc.tables[1]
+                    value = table1.rows[4].cells[1].text.strip()
+                    num = int(value)
+                    total_sum += num  
+        
+            netdoc=Document()
+            netdoc.add_heading(f"Net Profit",level=0)
+            table = netdoc.add_table(rows=2, cols=2)
+            table.style = "Table Grid"
+            table.cell(0,0).text = "Date"
+            table.cell(0,1).text = "Profit"
+            table.cell(1,0).text = str(date)
+            table.cell(1,1).text = str(total_sum)
+            netdoc.save(f"c:\\ub\\data.docx")
+            print("executed")
+        newdoc=Document(f"c:\\ub\\data.docx")
+        table2=newdoc.tables[0]
+        newvalue=table2.rows[1].cells[1].text.strip()
+        newnum=int(newvalue)
+        newtotal_sum=newnum+self.profit
+        table2.cell(1,1).text = str(newtotal_sum)
+        table2.cell(1,0).text = str(date)
+        newdoc.save(f"c:\\ub\\data.docx")
+            
     def save(self,date):
         self.doc.save(f"c:\\ub\\{date}.docx")
