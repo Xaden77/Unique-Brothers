@@ -1,0 +1,8 @@
+env
+build
+dist
+./vscode
+__pycache__
+.vscode
+main.spec
+test.py
