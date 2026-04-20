@@ -1,8 +1,8 @@
-from gui import Win1 as ui
-from logic import Logic as lo
-from store import Store as st
+from gui import Win1
+from logic import Logic
+from store import Store
 
-store=st()
-logic=lo(store)
-gui=ui(logic)
+store = Store()
+logic = Logic(store)
+gui = Win1(logic)
 gui.mainloop()
